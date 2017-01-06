@@ -14,7 +14,7 @@ Specifically, it provides:
   * Monthly average of daily maximum temperature (tmax)
   * Monthly average of daily minimum temperature (tmin)
   * Monthly total precipitation (precip)
-* Weather data:
+* Weather data: For a given year and month:
   * Monthly average of daily maximum temperature (tmax)
   * Monthly average of daily minimum temperature (tmin)
   * Monthly total precipitation (precip)
