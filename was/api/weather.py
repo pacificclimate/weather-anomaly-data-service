@@ -14,7 +14,7 @@ def weather(session, variable, month, year):
     :param month: (int) requested month (1...12)
     :return: (list) see above
     """
-    return [{ 'dataset': 'weather', 'variable': variable, 'year': year, 'type of year': str(type(year)), 'month': month}]
+    return { 'dataset': 'weather', 'variable': variable, 'year': year, 'month': month}
 
     view_for_variable = {
         'tmax': MonthlyAverageOfDailyMaxTemperature,
