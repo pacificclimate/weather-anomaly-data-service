@@ -11,6 +11,7 @@ import json
     ('/baseline/tmin;1', 200),
     ('/baseline/precip;1', 200),
     ('/baseline/bad;1', 404),
+    ('/weather/tmax;1850', 404),
     ('/weather/tmax;1849-1', 404),
     ('/weather/tmax;1850-0', 404),
     ('/weather/tmax;1850-1', 200),
@@ -23,17 +24,21 @@ import json
     ('/weather/precip;1850-1', 200),
     ('/weather/bad;1850-1', 404),
 ])
+@mark.usefixtures('session')   # need an empty database schema
 def test_route_validity(app, route, status):
     with app.test_client() as client:
         response = client.get(route)
         assert response.status_code == status
+        # assert False
 
 
-@mark.parametrize('route, data', [
-    ('/baseline/tmax;1', {u'dataset': u'baseline', u'variable': u'tmax', u'month': 1}),
-    ('/weather/tmax;2000-1', {u'dataset': u'weather', u'variable': u'tmax', u'year': 2000, u'month': 1})
+@mark.parametrize('route', [
+    ('/baseline/tmax;1'),
+    ('/weather/tmax;2000-1'),
 ])
-def test_route_response_data(app, route, data):
+@mark.usefixtures('session')
+def test_route_response_data(app, route):
     with app.test_client() as client:
         response = client.get(route)
-        assert json.loads(response.data) == data
+        data = json.loads(response.data)
+        assert type(data) is list
