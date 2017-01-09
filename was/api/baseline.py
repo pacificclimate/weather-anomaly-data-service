@@ -1,6 +1,7 @@
 from sqlalchemy import func
 from pycds import Network, History, Variable, DerivedValue
 from pycds.climate_baseline_helpers import pcic_climate_variable_network_name
+from was.util import dicts_from_rows
 
 
 def baseline(session, variable, month):
@@ -12,13 +13,12 @@ def baseline(session, variable, month):
     :param month: (int) requested baseline month (1...12)
     :return: (list) see above
     """
-    return { 'dataset': 'baseline', 'variable': variable, 'month': month}
+    # return { 'dataset': 'baseline', 'variable': variable, 'month': month}
 
     db_variable_name = {
         'tmax': 'Tx_Climatology',
         'tmin': 'Tn_Climatology',
         'precip': 'Precip_Climatology',
-
     }
 
     q = session.query(
@@ -35,4 +35,5 @@ def baseline(session, variable, month):
         .filter(Network.name == pcic_climate_variable_network_name)\
         .filter(Variable.name == db_variable_name[variable])\
         .filter(func.date_part('month', DerivedValue.time) == float(month))
-    return q.all()
+
+    return dicts_from_rows(q.all())

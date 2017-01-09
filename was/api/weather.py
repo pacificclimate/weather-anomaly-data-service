@@ -14,7 +14,7 @@ def weather(session, variable, month, year):
     :param month: (int) requested month (1...12)
     :return: (list) see above
     """
-    return { 'dataset': 'weather', 'variable': variable, 'year': year, 'month': month}
+    return [{ 'dataset': 'weather', 'variable': variable, 'year': year, 'month': month}]
 
     view_for_variable = {
         'tmax': MonthlyAverageOfDailyMaxTemperature,
@@ -34,4 +34,5 @@ def weather(session, variable, month, year):
         .select_from(WeatherView) \
         .join(History, WeatherView.history_id == History.id) \
         .filter(WeatherView.obs_date == datetime.datetime(year, month))
-    return q.all()
+
+    return dicts_from_rows(q.all())
