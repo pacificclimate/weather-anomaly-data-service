@@ -3,7 +3,7 @@ import os
 from flask import Flask
 from flask.ext.cors import CORS
 
-from was.routes import add_routes
+from wads.routes import add_routes
 
 
 def get_app(config_override={}):

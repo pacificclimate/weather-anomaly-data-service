@@ -3,7 +3,7 @@
 from logging import basicConfig
 from argparse import ArgumentParser
 
-from was.wsgi import app
+from wads.wsgi import app
 
 if __name__ == "__main__":
     parser = ArgumentParser(description='Start a development CE instance')

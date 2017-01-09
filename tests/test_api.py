@@ -1,5 +1,5 @@
 from pytest import mark
-from was.api import baseline
+from wads.api import baseline
 
 
 @mark.parametrize('variable, month', [

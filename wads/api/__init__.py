@@ -1,5 +1,5 @@
-from was.api.baseline import baseline
-from was.api.weather import weather
+from wads.api.baseline import baseline
+from wads.api.weather import weather
 from werkzeug.wrappers import BaseResponse as Response
 # from flask import Response
 import json

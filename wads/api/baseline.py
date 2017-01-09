@@ -1,7 +1,7 @@
 from sqlalchemy import func
 from pycds import Network, History, Variable, DerivedValue
 from pycds.climate_baseline_helpers import pcic_climate_variable_network_name
-from was.util import dicts_from_rows
+from wads.util import dicts_from_rows
 
 
 def baseline(session, variable, month):

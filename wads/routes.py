@@ -1,6 +1,6 @@
 from werkzeug.routing import IntegerConverter
 from flask.ext.sqlalchemy import SQLAlchemy
-import was.api
+import wads.api
 
 
 class ValidYearConverter(IntegerConverter):
@@ -49,5 +49,5 @@ def add_routes(app):
     @app.route('/{dataset}/{variable};{month}'.format(**components('baseline')), methods=['GET'])
     @app.route('/{dataset}/{variable};{year}-{month}'.format(**components('weather')), methods=['GET'])
     def dispatch(**kwargs):
-        return was.api.dispatch(db.session, **kwargs)
+        return wads.api.dispatch(db.session, **kwargs)
     # dispatch = partial(was.api.dispatch, db.session)  # rats, this doesn't work

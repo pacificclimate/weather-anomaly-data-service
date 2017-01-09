@@ -8,7 +8,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 import pycds
 from pycds import Network, Station, History, Variable, DerivedValue
 
-from was import get_app
+from wads import get_app
 
 
 # app, db, session fixtures based on http://alexmic.net/flask-sqlalchemy-pytest/
