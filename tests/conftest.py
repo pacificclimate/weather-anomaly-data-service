@@ -3,7 +3,7 @@ import datetime
 from pytest import fixture
 import testing.postgresql
 
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 
 import pycds
 from pycds import Network, Station, History, Variable, DerivedValue
