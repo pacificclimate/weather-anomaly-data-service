@@ -29,7 +29,6 @@ def test_route_validity(app, route, status):
     with app.test_client() as client:
         response = client.get(route)
         assert response.status_code == status
-        # assert False
 
 
 @mark.parametrize('route', [

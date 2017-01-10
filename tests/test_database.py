@@ -10,7 +10,7 @@ def test_db_session_works(session):
 
 
 def test_db_has_some_expected_tables(db):
-    expected_table_names = set('''meta_contact
+    expected_table_names = '''meta_contact
         meta_vars
         meta_history
         meta_sensor
@@ -19,10 +19,9 @@ def test_db_has_some_expected_tables(db):
         vars_per_history_mv
         obs_raw
         obs_derived_values
-        meta_pcic_flag
-        obs_raw_pcic_flags
         meta_native_flag
         obs_raw_native_flags
-    '''.split())
+    '''.split()
     table_names = inspect(db.engine).get_table_names()
-    assert expected_table_names <= set(table_names)
+    for name in expected_table_names:
+        assert name in table_names
