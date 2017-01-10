@@ -5,4 +5,4 @@ def dict_from_row(row):
 
 def dicts_from_rows(rows):
     """Return a list of dicts constructed from a list of SQLAlchemy result rows"""
-    return map(dict_from_row, rows)
+    return [dict_from_row(row) for row in rows]
