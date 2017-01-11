@@ -10,6 +10,7 @@ RUN apt list --installed
 RUN pip3 install -U pip
 RUN pip3 install -i https://pypi.pacificclimate.org/simple/ -r requirements.txt
 RUN python3 ./setup.py install
+RUN ./sudo-user.sh
 
 EXPOSE 8000
 

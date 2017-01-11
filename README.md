@@ -79,5 +79,5 @@ Building and using a local image
 
 ```bash
 docker build -t local-wads . 
-docker run --rm -it -v $(pwd):/app --name wads-test local-wads bash -c "./entry.sh && su -m r -c 'py.test -v tests'"
+docker run --rm -it -v $(pwd):/app --name wads-test local-wads bash -c "su -m user -c 'py.test -v tests'"
 ```
