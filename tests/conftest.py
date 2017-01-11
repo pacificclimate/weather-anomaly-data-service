@@ -37,6 +37,7 @@ def db(app):
 
     db.engine.execute("create extension postgis")
     pycds.Base.metadata.create_all(bind=db.engine)
+    # TODO: Uncomment when full release of PyCDS with WA views
     # pycds.weather_anomaly.Base.metadata.create_all(bind=db.engine)
 
     yield db
@@ -51,10 +52,11 @@ def db(app):
     #
     # Nominally, the following commented out code ought to work, but it hangs at the indicated line
 
-    # print '@fixture db: TEARDOWN'
+    # print('@fixture db: TEARDOWN')
     # db.engine.execute("drop extension postgis cascade")  # >>> hangs here
-    # print '@fixture db: drop_all'
+    # print('@fixture db: drop_all')
     # pycds.Base.metadata.drop_all(bind=db.engine)
+    # # TODO: Uncomment when full release of PyCDS with WA views
     # # pycds.weather_anomaly.Base.metadata.drop_all(bind=db.engine)
 
 
@@ -130,28 +132,15 @@ def cv_values(cv_variables, histories):
 
 
 @fixture(scope='function')
-def thing():
-    pass
-
-
-@fixture(scope='function')
 def baseline_session(session, stn_networks, stations, histories, cv_network, cv_variables, cv_values):
     """Session containing data for testing baseline query"""
-
     session.add_all(stn_networks)
-    session.flush()
     session.add_all(stations)
-    session.flush()
     session.add_all(histories)
-    session.flush()
-
     session.add(cv_network)
-    session.flush()
     session.add_all(cv_variables)
-    session.flush()
-
     session.add_all(cv_values)
-    session.flush()
+    session.commit()
 
     yield session
 
