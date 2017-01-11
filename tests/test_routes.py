@@ -39,5 +39,5 @@ def test_route_validity(app, route, status):
 def test_route_response_data(app, route):
     with app.test_client() as client:
         response = client.get(route)
-        data = json.loads(response.data)
+        data = json.loads(response.data.decode('utf-8'))
         assert type(data) is list
