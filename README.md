@@ -70,3 +70,14 @@ Defaults to `??? TBD`
 pip install pytest
 py.test -v
 ```
+
+#### Using Docker
+
+##### Current directory
+
+Building and using a local image
+
+```bash
+docker build -t local-wads . 
+docker run --rm -it -v $(pwd):/app --name wads-test local-wads bash -c "./entry.sh && su -m r -c 'py.test -v tests'"
+```
