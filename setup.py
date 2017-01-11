@@ -19,7 +19,7 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 setup(
-    name="was",
+    name="wads",
     description="PCIC microservice for weather anomaly data",
     keywords="sql database pcds crmp climate meteorology",
     packages=find_packages(),
@@ -31,15 +31,12 @@ setup(
         'Flask',
         'Flask-SQLAlchemy',
         'Flask-Cors',
+        'PyCDS',  # TODO: Add version requirement once versioning with WA tables and views has been set
     ],
-    package_dir={'was': 'was'},
-    package_data={}, #?
-    include_package_data=False, #?
     zip_safe=True,
     scripts=['scripts/devserver.py'],
-    tests_require=['pytest'],
+    tests_require=['pytest', 'testing.postgresql'],
     cmdclass={'test': PyTest},
-
     classifiers='''Development Status :: 2 - Pre-Alpha
 Environment :: Web Environment
 Intended Audience :: Developers
