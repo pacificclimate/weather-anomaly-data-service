@@ -5,13 +5,23 @@ from wads.util import dicts_from_rows
 
 
 def baseline(session, variable, month):
-    """Returns a list of items containing station info and the value of the climate baseline variable specified by
-    `variable`, for the month specified by `month`, for each station in the CRMP database climate baseline dataset.
+    """Returns list of climate baseline data.
 
     :param session: (sqlalchemy.orm.session.Session) database session
     :param variable: (string) requested baseline climate variable ('tmax' | 'tmin' | 'precip')
     :param month: (int) requested baseline month (1...12)
-    :return: (list) see above
+    :return: list of dicts containing station info and the value of the climate baseline variable specified by
+    `variable`, for the month specified by `month`, for each station in the CRMP database climate baseline dataset
+        [
+            {
+                'station_name': (str) station name
+                'lon': (num) station longitude
+                'lat': (num) station latitude
+                'elevation': (num) station elevatino
+                'datum': (num) observation value for variable
+            },
+            ...
+        ]
     """
 
     db_variable_name = {

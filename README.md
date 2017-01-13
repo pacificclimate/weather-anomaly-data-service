@@ -50,7 +50,7 @@ $ cd weather_anomaly_service
 $ virtualenv venv
 $ source venv/bin/activate
 (venv)$ pip install -U pip
-(venv)$ pip install --trusted-host tools.pacificclimate.org -i http://tools.pacificclimate.org/pypiserver/ -e .
+(venv)$ pip install -i http://pypi.pacificclimate.org/simple/ -e .
 ```
 
 ### Configuration

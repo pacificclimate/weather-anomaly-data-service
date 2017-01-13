@@ -47,7 +47,6 @@ def db(app):
 
     db.engine.execute("create extension postgis")
     pycds.Base.metadata.create_all(bind=db.engine)
-    # TODO: Uncomment when full release of PyCDS with WA views
     pycds.weather_anomaly.Base.metadata.create_all(bind=db.engine)
 
     yield db
@@ -66,8 +65,7 @@ def db(app):
     # db.engine.execute("drop extension postgis cascade")  # >>> hangs here
     # print('@fixture db: drop_all')
     # pycds.Base.metadata.drop_all(bind=db.engine)
-    # # TODO: Uncomment when full release of PyCDS with WA views
-    # # pycds.weather_anomaly.Base.metadata.drop_all(bind=db.engine)
+    # pycds.weather_anomaly.Base.metadata.drop_all(bind=db.engine)
 
 
 @fixture(scope='function')
@@ -96,8 +94,8 @@ def stn_networks():
 
 @fixture(scope='function')
 def stations(stn_networks):
-    """Stations, some for each network"""
-    return [Station(native_id=str(j*10+i), network=nw) for j, nw in enumerate(stn_networks) for i in range(0, 4)]
+    """Stations, 2 for each network"""
+    return [Station(native_id=str(j*10+i), network=nw) for j, nw in enumerate(stn_networks) for i in range(2)]
 
 
 @fixture(scope='function')
@@ -176,18 +174,21 @@ def precip_variables(stn_networks):
 
 @fixture(scope='function')
 def wx_values(stn_networks):
-    """Values (observations) for each weather variable for each station for some times"""
+    """Values (observations) for each weather variable for each station for each hour of each day of the month of
+    Jan 2000"""
     year = 2000
     month = 1
     days = range(1, 32)
     hours = range(0, 24)
-    temps = [Obs(variable=network.variables[0], history=history,
+    temps = [Obs(variable=network.variables[0], history=station.histories[-1],
+                 # brittle: this relies on network.variables being ordered air-temp, precip
                  time=datetime.datetime(year, month, day, hour), datum=float(hour))
-             for network in stn_networks for station in network.stations for history in station.histories
+             for network in stn_networks for station in network.stations
              for day in days for hour in hours]
-    precips = [Obs(variable=network.variables[1], history=history,
+    precips = [Obs(variable=network.variables[1], history=station.histories[-1],
+                   # brittle: this relies on network.variables being ordered air-temp, precip
                    time=datetime.datetime(year, month, day, hour), datum=1.0)
-               for network in stn_networks for station in network.stations for history in station.histories
+               for network in stn_networks for station in network.stations
                for day in days for hour in hours]
     return temps + precips
 
