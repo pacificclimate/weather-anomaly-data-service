@@ -2,6 +2,3 @@ Flask
 Flask-SQLAlchemy
 Flask-Cors
 PyCDS==2.0.1
-# Testing requirements
-pytest
-testing.postgresql
