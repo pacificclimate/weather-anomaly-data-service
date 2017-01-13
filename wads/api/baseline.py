@@ -13,7 +13,6 @@ def baseline(session, variable, month):
     :param month: (int) requested baseline month (1...12)
     :return: (list) see above
     """
-    # return { 'dataset': 'baseline', 'variable': variable, 'month': month}
 
     db_variable_name = {
         'tmax': 'Tx_Climatology',

@@ -1,5 +1,12 @@
 from pytest import mark
 import json
+import wads.api
+
+
+def mock(s, **kwargs):
+    """Mock for wads.api.method functions, e.g, wads.api.backend"""
+    return []
+
 
 @mark.parametrize('route, status', [
     ('/foo', 404),
@@ -24,20 +31,20 @@ import json
     ('/weather/precip;1850-1', 200),
     ('/weather/bad;1850-1', 404),
 ])
-@mark.usefixtures('session')   # need an empty database schema
-def test_route_validity(app, route, status):
-    with app.test_client() as client:
-        response = client.get(route)
-        assert response.status_code == status
+def test_route_validity(monkeypatch, test_client, route, status):
+    monkeypatch.setitem(wads.api.method, 'baseline', mock)
+    monkeypatch.setitem(wads.api.method, 'weather', mock)
+    response = test_client.get(route)
+    assert response.status_code == status
 
 
 @mark.parametrize('route', [
     ('/baseline/tmax;1'),
     ('/weather/tmax;2000-1'),
 ])
-@mark.usefixtures('session')
-def test_route_response_data(app, route):
-    with app.test_client() as client:
-        response = client.get(route)
-        data = json.loads(response.data.decode('utf-8'))
-        assert type(data) is list
+def test_route_response_data(monkeypatch, test_client, route):
+    monkeypatch.setitem(wads.api.method, 'baseline', mock)
+    monkeypatch.setitem(wads.api.method, 'weather', mock)
+    response = test_client.get(route)
+    data = json.loads(response.data.decode('utf-8'))
+    assert data == []
