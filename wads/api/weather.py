@@ -1,10 +1,11 @@
 import datetime
-from pycds import History
+from pycds import History, Variable
 from pycds.weather_anomaly import \
     MonthlyAverageOfDailyMaxTemperature, MonthlyAverageOfDailyMinTemperature, MonthlyTotalPrecipitation
 from wads.util import dicts_from_rows
 
 def weather(session, variable, year, month):
+    """Returns a list of aggregated weather observations.
 
     :param session: (sqlalchemy.orm.session.Session) database session
     :param variable: (string) requested weather variable ('tmax' | 'tmin' | 'precip')
@@ -18,6 +19,7 @@ def weather(session, variable, year, month):
                 'lon': (num) station longitude
                 'lat': (num) station latitude
                 'elevation': (num) station elevation
+                'cell_method': (str) observation method of this variable
                 'statistic': (num) variable value
                 'data_coverage': (num) fraction in range [0,1] of count of actual observations to possible observations
                     in month for aggregate (depends on frequency of observation of specific variable)
@@ -38,11 +40,15 @@ def weather(session, variable, year, month):
         History.lon,
         History.lat,
         History.elevation,
+        # TODO: Do we need other History info, e.g., frequency?
+        # TODO: Do we need other Variable info?
+        Variable.cell_method,
         WeatherView.statistic,
         WeatherView.data_coverage,
     ) \
         .select_from(WeatherView) \
         .join(History, WeatherView.history_id == History.id) \
+        .join(Variable, WeatherView.vars_id == Variable.id) \
         .filter(WeatherView.obs_month == datetime.datetime(year, month, 1))
 
     return dicts_from_rows(q.all())

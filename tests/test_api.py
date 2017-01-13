@@ -19,12 +19,12 @@ def test_baseline(baseline_session, histories, variable, month):
             } for history in histories]
 
 
-@mark.parametrize('variable, year, month, statistic', [
-    ('tmax', 2000, 1, 23.0),
-    ('tmin', 2000, 1, 0.0),
-    ('precip', 2000, 1, float(24 * 31)),
+@mark.parametrize('variable, year, month, cell_method, statistic', [
+    ('tmax', 2000, 1, 'time: point', 23.0),
+    ('tmin', 2000, 1, 'time: point', 0.0),
+    ('precip', 2000, 1, 'time: sum', float(24 * 31)),
 ])
-def test_weather(weather_session, histories, variable, year, month, statistic):
+def test_weather(weather_session, histories, variable, year, month, cell_method, statistic):
     result = weather(weather_session, variable, year, month)
     assert sorted(result, key=lambda r: r['station_name']) == \
            [{
@@ -32,6 +32,7 @@ def test_weather(weather_session, histories, variable, year, month, statistic):
                 'lon': history.lon,
                 'lat': history.lat,
                 'elevation': history.elevation,
+                'cell_method': cell_method,
                 'statistic': statistic,
                 'data_coverage': approx(1.0)
             } for history in histories]
