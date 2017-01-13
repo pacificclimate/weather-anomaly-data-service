@@ -6,7 +6,10 @@ import testing.postgresql
 from flask_sqlalchemy import SQLAlchemy
 
 import pycds
-from pycds import Network, Station, History, Variable, DerivedValue
+from pycds import Network, Station, History, Variable, DerivedValue, Obs
+from pycds.weather_anomaly import \
+    DailyMaxTemperature, DailyMinTemperature, \
+    MonthlyAverageOfDailyMaxTemperature, MonthlyAverageOfDailyMinTemperature, MonthlyTotalPrecipitation
 
 from wads import get_app
 
@@ -18,6 +21,7 @@ def app():
     """Session-wide test Flask application"""
     with testing.postgresql.Postgresql() as pg:
         config_override = {
+            'TESTING': True,
             'SQLALCHEMY_DATABASE_URI': pg.url()
         }
         app = get_app(config_override)
@@ -31,6 +35,12 @@ def app():
 
 
 @fixture(scope='session')
+def test_client(app):
+    with app.test_client() as client:
+        yield client
+
+
+@fixture(scope='session')
 def db(app):
     """Session-wide test database"""
     db = SQLAlchemy(app)
@@ -38,7 +48,7 @@ def db(app):
     db.engine.execute("create extension postgis")
     pycds.Base.metadata.create_all(bind=db.engine)
     # TODO: Uncomment when full release of PyCDS with WA views
-    # pycds.weather_anomaly.Base.metadata.create_all(bind=db.engine)
+    pycds.weather_anomaly.Base.metadata.create_all(bind=db.engine)
 
     yield db
 
@@ -100,6 +110,7 @@ def histories(stations):
         lat=48.5,
         elevation= 100.0 + i,
         sdate=datetime.datetime(2000, 1, 1),
+        freq='1-hourly'
     ) for i, station in enumerate(stations)]
 
 
@@ -116,7 +127,6 @@ def cv_variables(cv_network):
             for name in 'Tx_Climatology Tn_Climatology Precip_Climatology'.split()]
 
 
-# Climate values
 @fixture(scope='function')
 def cv_values(cv_variables, histories):
     """Values for each baseline climate variable for each station for each month"""
@@ -132,16 +142,64 @@ def cv_values(cv_variables, histories):
 
 
 @fixture(scope='function')
-def baseline_session(session, stn_networks, stations, histories, cv_network, cv_variables, cv_values):
-    """Session containing data for testing baseline query"""
+def stations_session(session, stn_networks, stations, histories):
     session.add_all(stn_networks)
     session.add_all(stations)
     session.add_all(histories)
-    session.add(cv_network)
-    session.add_all(cv_variables)
-    session.add_all(cv_values)
     session.commit()
-
     yield session
 
 
+@fixture(scope='function')
+def baseline_session(stations_session, cv_network, cv_variables, cv_values):
+    """Session containing data for testing baseline query"""
+    stations_session.add(cv_network)
+    stations_session.add_all(cv_variables)
+    stations_session.add_all(cv_values)
+    stations_session.commit()
+    yield stations_session
+
+
+@fixture(scope='function')
+def air_temp_variables(stn_networks):
+    """Variables for air temperature observations in the weather (station) networks"""
+    return [Variable(standard_name='air_temperature', cell_method='time: point', network=network)
+            for network in stn_networks]
+
+
+@fixture(scope='function')
+def precip_variables(stn_networks):
+    """Variables for precipitation observations in the weather (station) networks"""
+    return [Variable(standard_name='lwe_thickness_of_precipitation_amount', cell_method='time: sum', network=network)
+            for network in stn_networks]
+
+
+@fixture(scope='function')
+def wx_values(stn_networks):
+    """Values (observations) for each weather variable for each station for some times"""
+    year = 2000
+    month = 1
+    days = range(1, 32)
+    hours = range(0, 24)
+    temps = [Obs(variable=network.variables[0], history=history,
+                 time=datetime.datetime(year, month, day, hour), datum=float(hour))
+             for network in stn_networks for station in network.stations for history in station.histories
+             for day in days for hour in hours]
+    precips = [Obs(variable=network.variables[1], history=history,
+                   time=datetime.datetime(year, month, day, hour), datum=1.0)
+               for network in stn_networks for station in network.stations for history in station.histories
+               for day in days for hour in hours]
+    return temps + precips
+
+
+@fixture(scope='function')
+def weather_session(stations_session, air_temp_variables, precip_variables, wx_values):
+    """Session containing data for testing weather query"""
+    stations_session.add_all(air_temp_variables)
+    stations_session.add_all(precip_variables)
+    stations_session.add_all(wx_values)
+    stations_session.commit()
+    for view in [DailyMaxTemperature, DailyMinTemperature,
+                 MonthlyAverageOfDailyMaxTemperature, MonthlyAverageOfDailyMinTemperature, MonthlyTotalPrecipitation]:
+        view.create(stations_session)
+    yield stations_session
