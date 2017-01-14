@@ -19,9 +19,31 @@ Specifically, it provides:
   * Monthly average of daily minimum temperature (tmin)
   * Monthly total precipitation (precip)
 
+Each endpoint returns a list containing one data object per station, for all stations in the database. No filtering
+on station (by location or any other crieria) is available at this time.
+
+Each data object contains station information (including network, station native id, and location) and the data
+at that station as appropriate to the endpoint (e.g., baseline monthly average of daily maxmimum temperature for
+a specified month).
+
 ## Endpoints
 
-We could use Swagger (http://swagger.io/) for this!
+We follow RESTful conventions in this microservice. Specifically:
+
+* Each dataset is regarded as a resource.
+* The resources are read-only, hence only the GET verb is allowed on them.
+* Resources are named (URI) hierarchically, where real hierarchy exists.
+* Where there is no hierarchy, but there are several components to a hierarchical level, those components stay in the
+  path and are separated by appropriate punctuation such as semicolon or comma (we use semicolon). 
+  * In our case, this is the combination of variable and year/month specifiers.
+  * This is not a universal convention; many APIs put such specifiers in query parameters.
+  * See [this stackoverflow discussion](http://stackoverflow.com/a/31261026)
+  and [this one](http://stackoverflow.com/a/11569077)
+* Resources are named such that optional specifiers and filtering, ordering, 
+  and other algorithmic specifiers (parameters) are in query parameters.
+  * We have no such specifiers (yet: we may add filtering on station location, etc.)
+
+Therefore we have the following resource URIs:
 
 * Baseline data: `<base URL>/baseline/<variable>;<month>`
 * Weather data: `<base URL>/weather/<variable>;<year>-<month>`
@@ -32,9 +54,32 @@ where
 * `<year>` is an integer between 1850 and 2100, specifying the year of interest
 * `<month>` is an integer between 1 and 12, specifying the month of interest
 
-Endpoints return results as JSON (application/json).
+(Note: We could use Swagger (http://swagger.io/) for this!)
 
-Invalid values for `<variable>`, `<year>`, or `<month>` result in a 404 Not Found.
+### Success responses
+
+Success is indicated by a 200 OK status.
+
+Endpoints return results as JSON (application/json). Nominal JSON spec:
+```json
+[
+    {
+        "network_name": String,
+        "native_id": String,
+        "station_name": String,
+        "lon": Number,
+        "lat": Number,
+        "elevation": Number,
+        <requested datum>
+    },
+    ...
+]
+```
+
+### Failure responses
+
+Any invalid URI results in a 404 Not Found status. Specifically,
+invalid values for `<variable>`, `<year>`, or `<month>` result in a 404 Not Found.
 
 ## Requirements
 
