@@ -1,15 +1,24 @@
-FROM pcic/geospatial-python
+FROM ubuntu
+
+MAINTAINER Rod Glover <rglover@uvic.ca>
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get -yq install \
+        libpq-dev \
+        python3 \
+        python3-dev \
+        python3-pip \
+        postgresql-client
 
 ADD . /app
 WORKDIR /app
 
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && \
-    apt-get -yq install postgresql postgresql-contrib postgis postgresql-9.3-postgis-2.1
 RUN pip3 install -U pip
+# RUN pip3 install psycopg2
 RUN pip3 install -i https://pypi.pacificclimate.org/simple/ -r requirements.txt
-RUN python3 ./setup.py install
-RUN ./sudo-user.sh
+RUN pip3 install .
+# RUN python3 ./setup.py install
 
 EXPOSE 8000
 

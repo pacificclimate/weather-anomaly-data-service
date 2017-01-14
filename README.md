@@ -71,13 +71,24 @@ pip install pytest
 py.test -v
 ```
 
-#### Using Docker
+### Using Docker
 
-##### Current directory
+#### Building images
 
-Building and using a local image
+To build production image:
 
 ```bash
-docker build -t local-wads . 
-docker run --rm -it -v $(pwd):/app --name wads-test local-wads bash -c "su -m user -c 'py.test -v tests'"
+docker build -t pcic/weather-anomaly-data-service . 
+```
+
+To build development/testing image:
+
+```bash
+docker build -t pcic/weather-anomaly-data-service-dev  -f Dockerfile.dev .
+```
+
+To run tests (note: must use dev/test image):
+
+```bash
+docker run --rm -it -v $(pwd):/app --name wads-test pcic/weather-anomaly-data-service-dev bash -c "su -m user -c 'py.test -v tests'"
 ```

@@ -1,0 +1,16 @@
+FROM pcic/weather-anomaly-data-service
+
+MAINTAINER Rod Glover <rglover@uvic.ca>
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get -yq install postgresql postgresql-contrib postgis postgresql-9.5-postgis-2.2
+
+RUN pip3 install -i https://pypi.pacificclimate.org/simple/ -r test_requirements.txt
+
+# Add a non-root user. A non-root user is required to run the postgresql server, which in turn is needed to run tests
+# (though to run the microservice alone).
+# To run a command under this user: docker run [options] bash -c "su -m user -c <command>"
+RUN adduser --disabled-password --gecos '' user
+RUN adduser user sudo
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
