@@ -12,7 +12,9 @@ import wads.api
 
 
 def mock(s, **kwargs):
-    """Mock for wads.api.method functions, e.g, wads.api.method['backend']"""
+    """Mock for wads.api.method functions, e.g, wads.api.method['backend']
+    See explanation in module docstring.
+    """
     return ['info']
 
 

@@ -20,7 +20,7 @@ def baseline(session, variable, month):
                 'lon': (num) station longitude,
                 'lat': (num) station latitude,
                 'elevation': (num) station elevation,
-                'datum': (num) observation value for variable
+                'datum': (num) value for variable
             },
             ...
         ]
