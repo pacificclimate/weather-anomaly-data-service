@@ -65,7 +65,7 @@ Endpoints return results as JSON (application/json). Nominal JSON spec:
 [
     {
         "network_name": String,
-        "native_id": String,
+        "station_native_id": String,
         "station_name": String,
         "lon": Number,
         "lat": Number,

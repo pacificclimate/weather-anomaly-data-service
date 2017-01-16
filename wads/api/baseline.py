@@ -1,5 +1,5 @@
 from sqlalchemy import func
-from pycds import Network, History, Variable, DerivedValue
+from pycds import Network, Station, History, Variable, DerivedValue
 from pycds.climate_baseline_helpers import pcic_climate_variable_network_name
 from wads.util import dicts_from_rows
 
@@ -14,6 +14,8 @@ def baseline(session, variable, month):
     `variable`, for the month specified by `month`, for each station in the CRMP database climate baseline dataset
         [
             {
+                'network_name': (str) network name,
+                'station_native_id': (str) station native id,
                 'station_name': (str) station name
                 'lon': (num) station longitude
                 'lat': (num) station latitude
@@ -31,6 +33,8 @@ def baseline(session, variable, month):
     }
 
     q = session.query(
+        Network.name.label('network_name'),
+        Station.native_id.label('station_native_id'),
         History.station_name,
         History.lon,
         History.lat,
@@ -40,6 +44,7 @@ def baseline(session, variable, month):
         .select_from(DerivedValue)\
         .join(DerivedValue.history)\
         .join(DerivedValue.variable)\
+        .join(History.station)\
         .join(Variable.network)\
         .filter(Network.name == pcic_climate_variable_network_name)\
         .filter(Variable.name == db_variable_name[variable])\
