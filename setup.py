@@ -4,20 +4,6 @@ from setuptools.command.test import test as TestCommand
 
 __version__ = (0, 1, 0)
 
-
-class PyTest(TestCommand):
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = ['-v', 'tests']
-        self.test_suite = True
-
-    def run_tests(self):
-        # import here, cause outside the eggs aren't loaded
-        import pytest
-        errno = pytest.main(self.test_args)
-        sys.exit(errno)
-
 setup(
     name="wads",
     description="PCIC microservice for weather anomaly data",
@@ -36,7 +22,6 @@ setup(
     zip_safe=True,
     scripts=['scripts/devserver.py'],
     tests_require=['pytest', 'testing.postgresql'],
-    cmdclass={'test': PyTest},
     classifiers='''Development Status :: 2 - Pre-Alpha
 Environment :: Web Environment
 Intended Audience :: Developers
