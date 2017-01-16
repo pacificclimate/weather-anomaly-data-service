@@ -15,10 +15,8 @@ ADD . /app
 WORKDIR /app
 
 RUN pip3 install -U pip
-# RUN pip3 install psycopg2
 RUN pip3 install -i https://pypi.pacificclimate.org/simple/ -r requirements.txt
 RUN pip3 install .
-# RUN python3 ./setup.py install
 
 EXPOSE 8000
 
