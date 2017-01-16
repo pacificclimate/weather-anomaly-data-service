@@ -1,11 +1,19 @@
+"""Tests for API routing and result processing. These tests are only of the routing and data
+handling, not of the queries to the database (the latter are tested in test_api.py).
+
+It's unnecessary and undesirable to invoke the database for these tests, so we mock the backend
+query methods `baseline` and `weather` with a replacement function that returns a fixed,
+known response. This is the function `mock`, which can serve for both `baseline` and `weather`.
+"""
+
 from pytest import mark
 import json
 import wads.api
 
 
 def mock(s, **kwargs):
-    """Mock for wads.api.method functions, e.g, wads.api.backend"""
-    return []
+    """Mock for wads.api.method functions, e.g, wads.api.method['backend']"""
+    return ['info']
 
 
 @mark.parametrize('route, status', [
@@ -47,4 +55,4 @@ def test_route_response_data(monkeypatch, test_client, route):
     monkeypatch.setitem(wads.api.method, 'weather', mock)
     response = test_client.get(route)
     data = json.loads(response.data.decode('utf-8'))
-    assert data == []
+    assert data == ['info']
