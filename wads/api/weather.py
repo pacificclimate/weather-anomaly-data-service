@@ -12,19 +12,21 @@ def weather(session, variable, year, month):
     :param year: (int) requested year
     :param month: (int) requested month (1...12)
     :return: (list) a list of items containing station info and the value of the weather variable specified by `variable`,
-        for the month specified by `year` and `month`, for each station in the CRMP database monthly weather views.
-                [
+    for the month specified by `year` and `month`, for each station in the CRMP database monthly weather views.
+        [
             {
                 'network_name': (str) network name,
                 'station_native_id': (str) station native id,
-                'station_name': (str) station name
-                'lon': (num) station longitude
-                'lat': (num) station latitude
-                'elevation': (num) station elevation
-                'cell_method': (str) observation method of this variable
-                'statistic': (num) variable value
+                'station_name': (str) station name,
+                'lon': (num) station longitude,
+                'lat': (num) station latitude,
+                'elevation': (num) station elevation,
+                'frequency': (str) observation frequency,
+                'network_variable_name': (str) network-specific name for this variable,
+                'cell_method': (str) observation method of this variable,
+                'statistic': (num) variable value,
                 'data_coverage': (num) fraction in range [0,1] of count of actual observations to possible observations
-                    in month for aggregate (depends on frequency of observation of specific variable)
+                    in month for aggregate (depends on frequency of observation of specific variable),
             },
             ...
         ]
@@ -44,8 +46,8 @@ def weather(session, variable, year, month):
         History.lon,
         History.lat,
         History.elevation,
-        # TODO: Do we need other History info, e.g., frequency?
-        # TODO: Do we need other Variable info?
+        History.freq.label('frequency'),
+        Variable.name.label('network_variable_name'),
         Variable.cell_method,
         WeatherView.statistic,
         WeatherView.data_coverage,

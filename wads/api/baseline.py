@@ -16,10 +16,10 @@ def baseline(session, variable, month):
             {
                 'network_name': (str) network name,
                 'station_native_id': (str) station native id,
-                'station_name': (str) station name
-                'lon': (num) station longitude
-                'lat': (num) station latitude
-                'elevation': (num) station elevatino
+                'station_name': (str) station name,
+                'lon': (num) station longitude,
+                'lat': (num) station latitude,
+                'elevation': (num) station elevation,
                 'datum': (num) observation value for variable
             },
             ...

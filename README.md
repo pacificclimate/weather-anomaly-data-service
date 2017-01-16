@@ -56,11 +56,21 @@ where
 
 (Note: We could use Swagger (http://swagger.io/) for this sepcification!)
 
-### Success responses
+## Responses
+
+### General
+
+Endpoints return results as JSON (application/json). 
 
 Success is indicated by a 200 OK status.
 
-Endpoints return results as JSON (application/json). Nominal JSON spec:
+Any invalid URI results in a 404 Not Found status. Specifically,
+invalid values for `<variable>`, `<year>`, or `<month>` result in a 404 Not Found.
+
+### `/baseline/<variable>;<month>` endpoints
+
+Response data on success (200):
+
 ```json
 [
     {
@@ -70,42 +80,49 @@ Endpoints return results as JSON (application/json). Nominal JSON spec:
         "lon": Number,
         "lat": Number,
         "elevation": Number,
-        <requested info>
+        "datum": Number
     },
     ...
 ]
 ```
 
-For baseline data, `<requested info>` is a single dictionary item containing the value of the 
-requested climate variable:
-
-```json
-{
-    "datum": Number
-}
-```
+`"datum"` is the value of the requested climate variable for the station.
 
 For weather data, `<requested info>` is two dictionary items, one containing the value of the 
 requested aggregate weather variable, and the other a number between 0 and 1 indicating the fraction of 
 actual observations contributing to the aggregate value relative to the possible number of observations contributing:
 
 
+### `/weather/<variable>;<year>-<month>` endpoints
+
+Response data on success (200):
+
 ```json
-{
-    "statistic": Number,
-    "data_coverage": Number
-}
+[
+    {
+        "network_name": String,
+        "station_native_id": String,
+        "station_name": String,
+        "lon": Number,
+        "lat": Number,
+        "elevation": Number,
+        "frequency": String,
+        "network_variable_name": String,
+        "statistic": Number,
+        "data_coverage": Number
+    },
+    ...
+]
 ```
 
-### Failure responses
+`"statistic"` is the value of the requested aggregate weather variable at the station
 
-Any invalid URI results in a 404 Not Found status. Specifically,
-invalid values for `<variable>`, `<year>`, or `<month>` result in a 404 Not Found.
+`"data_coverage"` is a fraction in range [0,1] of count of actual observations to possible observations
+in month for aggregate (depends on frequency of observation of specific variable)
 
 ## Requirements
 
-```json
-
+```
 libpq-dev 
 python-dev
 postgresql-client

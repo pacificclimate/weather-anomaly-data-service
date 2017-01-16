@@ -161,14 +161,16 @@ def baseline_session(stations_session, cv_network, cv_variables, cv_values):
 @fixture(scope='function')
 def air_temp_variables(stn_networks):
     """Variables for air temperature observations in the weather (station) networks"""
-    return [Variable(standard_name='air_temperature', cell_method='time: point', network=network)
+    return [Variable(network=network, name='{} air temp'.format(network.name),
+                     standard_name='air_temperature', cell_method='time: point')
             for network in stn_networks]
 
 
 @fixture(scope='function')
 def precip_variables(stn_networks):
     """Variables for precipitation observations in the weather (station) networks"""
-    return [Variable(standard_name='lwe_thickness_of_precipitation_amount', cell_method='time: sum', network=network)
+    return [Variable(network=network, name='{} precip'.format(network.name),
+                     standard_name='lwe_thickness_of_precipitation_amount', cell_method='time: sum')
             for network in stn_networks]
 
 
