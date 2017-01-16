@@ -2,6 +2,10 @@ from werkzeug.routing import IntegerConverter
 from flask_sqlalchemy import SQLAlchemy
 import wads.api
 
+# Flask converters validate and process (including type conversion) variable parts in a route. Flask provides builtin
+# converters (e.g., `any`), and users may supplement these with custom converters. We provide two custom converters:
+# one to validate and covert valid <year> parts in URIs; one to validate and convert integer coded <month> parts.
+
 
 class ValidYearConverter(IntegerConverter):
     """This converter only accepts integer values between 1850 and 2100::
@@ -9,10 +13,8 @@ class ValidYearConverter(IntegerConverter):
         Rule('/page/<valid_year:value>')
 
     :param map: the :class:`Map`.
+    :returns int: the validated value as an integer
     """
-    regex = r'\d+'
-    num_convert = int
-
     def __init__(self, map):
         IntegerConverter.__init__(self, map, min=1850, max=2100)
 
@@ -23,10 +25,8 @@ class MonthConverter(IntegerConverter):
         Rule('/page/<int_month:value>')
 
     :param map: the :class:`Map`.
+    :returns int: the validated value as an integer
     """
-    regex = r'\d+'
-    num_convert = int
-
     def __init__(self, map):
         IntegerConverter.__init__(self, map, min=1, max=12)
 
