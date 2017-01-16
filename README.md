@@ -30,8 +30,8 @@ a specified month).
 
 We follow RESTful conventions in this microservice. Specifically:
 
-* Each dataset is regarded as a resource.
-* The resources are read-only, hence only the GET verb is allowed on them.
+* Each dataset is regarded as a resource. 
+  (In this case, the resources are read-only, hence only the GET verb is allowed on them.)
 * Resources are named (URI) hierarchically, where real hierarchy exists.
 * Where there is no hierarchy, but there are several components to a hierarchical level, those components stay in the
   path and are separated by appropriate punctuation such as semicolon or comma (we use semicolon). 
@@ -45,8 +45,8 @@ We follow RESTful conventions in this microservice. Specifically:
 
 Therefore we have the following resource URIs:
 
-* Baseline data: `<base URL>/baseline/<variable>;<month>`
-* Weather data: `<base URL>/weather/<variable>;<year>-<month>`
+* Baseline data: `/baseline/<variable>;<month>`
+* Weather data: `/weather/<variable>;<year>-<month>`
 
 where
 
@@ -54,7 +54,7 @@ where
 * `<year>` is an integer between 1850 and 2100, specifying the year of interest
 * `<month>` is an integer between 1 and 12, specifying the month of interest
 
-(Note: We could use Swagger (http://swagger.io/) for this!)
+(Note: We could use Swagger (http://swagger.io/) for this sepcification!)
 
 ### Success responses
 
@@ -70,10 +70,31 @@ Endpoints return results as JSON (application/json). Nominal JSON spec:
         "lon": Number,
         "lat": Number,
         "elevation": Number,
-        <requested datum>
+        <requested info>
     },
     ...
 ]
+```
+
+For baseline data, `<requested info>` is a single dictionary item containing the value of the 
+requested climate variable:
+
+```json
+{
+    "datum": Number
+}
+```
+
+For weather data, `<requested info>` is two dictionary items, one containing the value of the 
+requested aggregate weather variable, and the other a number between 0 and 1 indicating the fraction of 
+actual observations contributing to the aggregate value relative to the possible number of observations contributing:
+
+
+```json
+{
+    "statistic": Number,
+    "data_coverage": Number
+}
 ```
 
 ### Failure responses
@@ -83,7 +104,12 @@ invalid values for `<variable>`, `<year>`, or `<month>` result in a 404 Not Foun
 
 ## Requirements
 
-libpq-dev(???) python-dev
+```json
+
+libpq-dev 
+python-dev
+postgresql-client
+```
 
 ## Installation
 
