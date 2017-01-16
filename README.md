@@ -126,8 +126,8 @@ $ source venv/bin/activate
 
 ### Configuration
 
-Database dsn can be configured with the `CRMP_DSN` environment variable. 
-Defaults to `??? TBD`
+Database dsn can be configured with the `PCDS_DSN` environment variable. 
+Defaults to `postgresql://httpd@monsoon.pcic.uvic.ca/crmp`
 
 ```bash
 (venv)$ CRMP_DSN=postgresql://dbuser:dbpass@dbhost/dbname scripts/devserver.py -p <port>
