@@ -130,15 +130,20 @@ postgresql-client
 
 ## Installation
 
-It is best practice to install using `virtualenv`.
+It is best practice to install using a virtual environment.
+Current recommended practice for Python3.3+ to use the [builtin `venv` module](https://docs.python.org/3/library/venv.html).
+(Alternatively, `virtualenv` can still be used but it has shortcomings corrected in `venv`.)
+See [Creating Virtual Environments](https://packaging.python.org/installing/#creating-virtual-environments) for an
+overview of these tools.
 
 ```bash
-$ git clone https://github.com/pacificclimate/weather_anomaly_service
-$ cd weather_anomaly_service
-$ virtualenv venv
+$ git clone https://github.com/pacificclimate/weather-anomaly-data-service
+$ cd weather-anomaly-data-service
+$ python3 -m venv venv
 $ source venv/bin/activate
-(venv)$ pip install -U pip
-(venv)$ pip install -i http://pypi.pacificclimate.org/simple/ -e .
+(venv)$ pip install -U pip --user
+(venv)$ pip install -i https://pypi.pacificclimate.org/simple/ -e .
+(venv)$ pip install -r test_requirements.txt
 ```
 
 ### Configuration
@@ -154,8 +159,9 @@ Defaults to `postgresql://httpd@monsoon.pcic.uvic.ca/crmp`
 
 #### Within the virtual environment:
 
+(Make sure you have installed the packages in `test_requirements.txt` as instructed above.)
+
 ```bash
-pip install pytest
 py.test -v
 ```
 
