@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 import pycds
 from pycds import Network, Station, History, Variable, DerivedValue, Obs
 from pycds.weather_anomaly import \
+    DiscardedObs, \
     DailyMaxTemperature, DailyMinTemperature, \
     MonthlyAverageOfDailyMaxTemperature, MonthlyAverageOfDailyMinTemperature, MonthlyTotalPrecipitation
 
@@ -144,7 +145,7 @@ def stations_session(session, stn_networks, stations, histories):
     session.add_all(stn_networks)
     session.add_all(stations)
     session.add_all(histories)
-    session.commit()
+    session.flush()
     yield session
 
 
@@ -154,55 +155,80 @@ def baseline_session(stations_session, cv_network, cv_variables, cv_values):
     stations_session.add(cv_network)
     stations_session.add_all(cv_variables)
     stations_session.add_all(cv_values)
-    stations_session.commit()
+    stations_session.flush()
     yield stations_session
 
 
 @fixture(scope='function')
 def air_temp_variables(stn_networks):
     """Variables for air temperature observations in the weather (station) networks"""
-    return [Variable(network=network, name='{} air temp'.format(network.name),
-                     standard_name='air_temperature', cell_method='time: point')
+    return [Variable(network=network,
+                     name='{} air temp'.format(network.name),
+                     standard_name='air_temperature',
+                     cell_method='time: point')
             for network in stn_networks]
 
 
 @fixture(scope='function')
 def precip_variables(stn_networks):
-    """Variables for precipitation observations in the weather (station) networks"""
-    return [Variable(network=network, name='{} precip'.format(network.name),
-                     standard_name='lwe_thickness_of_precipitation_amount', cell_method='time: sum')
+    """Variables for precipitation observations in the weather (station) networks.
+    Returns two sets of variables per network: lwe precipitation and snowfall thickness. Both types are processed
+    by MonthlyTotalPrecipitation, but only lwe should be returned by the weather API."""
+    return [Variable(network=network,
+                     name='{} lwe precip'.format(network.name),
+                     standard_name='lwe_thickness_of_precipitation_amount',
+                     cell_method='time: sum')
+            for network in stn_networks] \
+           + \
+           [Variable(network=network, name='{} snowfall'.format(network.name),
+                     standard_name='thickness_of_snowfall_amount', cell_method='time: sum')
             for network in stn_networks]
 
 
+# Constants for weather value fixtures
+year = 2000
+month = 1
+days = range(1, 32)
+hours = range(0, 24)
+
+
 @fixture(scope='function')
-def wx_values(stn_networks):
-    """Values (observations) for each weather variable for each station for each hour of each day of the month of
+def temp_values(air_temp_variables):
+    """Values (observations) for the temperature variable for each station for each hour of each day of the month of
     Jan 2000"""
-    year = 2000
-    month = 1
-    days = range(1, 32)
-    hours = range(0, 24)
-    temps = [Obs(variable=network.variables[0], history=station.histories[-1],
-                 # brittle: this relies on network.variables being ordered air-temp, precip
-                 time=datetime.datetime(year, month, day, hour), datum=float(hour))
-             for network in stn_networks for station in network.stations
-             for day in days for hour in hours]
-    precips = [Obs(variable=network.variables[1], history=station.histories[-1],
-                   # brittle: this relies on network.variables being ordered air-temp, precip
-                   time=datetime.datetime(year, month, day, hour), datum=1.0)
-               for network in stn_networks for station in network.stations
-               for day in days for hour in hours]
-    return temps + precips
+    return [Obs(variable=variable,
+                history=station.histories[-1], # last history is latest
+                time=datetime.datetime(year, month, day, hour),
+                datum=float(hour))
+            for variable in air_temp_variables
+            for station in variable.network.stations
+            for day in days
+            for hour in hours]
 
 
 @fixture(scope='function')
-def weather_session(stations_session, air_temp_variables, precip_variables, wx_values):
+def precip_values(precip_variables):
+    """Values (observations) for the precipitation variables for each station for each hour of each day of the month of
+    Jan 2000"""
+    return [Obs(variable=variable,
+                history=station.histories[-1], # last history is latest
+                time=datetime.datetime(year, month, day, hour),
+                datum=1.0)
+            for variable in precip_variables
+            for station in variable.network.stations
+            for day in days
+            for hour in hours]
+
+
+@fixture(scope='function')
+def weather_session(stations_session, air_temp_variables, precip_variables, temp_values, precip_values):
     """Session containing data for testing weather query"""
     stations_session.add_all(air_temp_variables)
     stations_session.add_all(precip_variables)
-    stations_session.add_all(wx_values)
-    stations_session.commit()
-    for view in [DailyMaxTemperature, DailyMinTemperature,
+    stations_session.add_all(temp_values)
+    stations_session.add_all(precip_values)
+    stations_session.flush()
+    for view in [DiscardedObs, DailyMaxTemperature, DailyMinTemperature,
                  MonthlyAverageOfDailyMaxTemperature, MonthlyAverageOfDailyMinTemperature, MonthlyTotalPrecipitation]:
         view.create(stations_session)
     yield stations_session

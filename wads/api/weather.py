@@ -59,4 +59,7 @@ def weather(session, variable, year, month):
         .join(Variable, WeatherView.vars_id == Variable.id) \
         .filter(WeatherView.obs_month == datetime.datetime(year, month, 1))
 
+    if WeatherView == MonthlyTotalPrecipitation:
+        q = q.filter(Variable.standard_name == u'lwe_thickness_of_precipitation_amount')
+
     return dicts_from_rows(q.all())

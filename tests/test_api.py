@@ -25,7 +25,7 @@ def test_baseline(baseline_session, histories, variable, month):
 @mark.parametrize('variable, year, month, nvm, cell_method, statistic', [
     ('tmax', 2000, 1, 'air temp', 'time: point', 23.0),
     ('tmin', 2000, 1, 'air temp', 'time: point', 0.0),
-    ('precip', 2000, 1, 'precip', 'time: sum', float(24 * 31)),
+    ('precip', 2000, 1, 'lwe precip', 'time: sum', float(24 * 31)),
 ])
 def test_weather(weather_session, histories, variable, year, month, nvm, cell_method, statistic):
     result = weather(weather_session, variable, year, month)
