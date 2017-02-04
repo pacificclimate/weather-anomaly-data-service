@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import func, cast, Float
 from pycds import Network, Station, History, Variable, DerivedValue
 from pycds.climate_baseline_helpers import pcic_climate_variable_network_name
 from wads.util import dicts_from_rows
@@ -36,9 +36,9 @@ def baseline(session, variable, month):
         Network.name.label('network_name'),
         Station.native_id.label('station_native_id'),
         History.station_name,
-        History.lon,
-        History.lat,
-        History.elevation,
+        cast(History.lon, Float),
+        cast(History.lat, Float),
+        cast(History.elevation, Float),
         DerivedValue.datum,
     )\
         .select_from(DerivedValue)\
