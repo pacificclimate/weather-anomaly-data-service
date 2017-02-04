@@ -1,4 +1,7 @@
-FROM ubuntu
+# To run pytest successfully in any docker container, the container must be baseed on ubuntu 14.04;
+# or, more correctly, it cannot be based on ubuntu 16.04, which is what an untagged `FROM ubuntu` loads.
+# No online documentation of why this is so has been found.
+FROM ubuntu:14.04
 
 MAINTAINER Rod Glover <rglover@uvic.ca>
 

@@ -1,14 +1,22 @@
+# Note: In order to run tests (which is what this container is for), the ubuntu base image must be 14.04.
+# See comments at head of Dockerfile for more info.
 FROM pcic/weather-anomaly-data-service
 
 MAINTAINER Rod Glover <rglover@uvic.ca>
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
-    apt-get -yq install postgresql postgresql-contrib postgis postgresql-9.5-postgis-2.2
+    apt-get -yq install \
+    postgresql \
+    postgresql-contrib \
+    postgis \
+#    postgresql-9.5-postgis-2.2  # For ubuntu 16.04, but see above
+    postgresql-9.3-postgis-2.1  # For ubuntu 14.04
 
 RUN pip3 install -i https://pypi.pacificclimate.org/simple/ -r test_requirements.txt
 
 # Add a non-root user. A non-root user is required to run the postgresql server, which in turn is needed to run tests
+# (though to run the microservice alone).
 # (though to run the microservice alone).
 # To run a command under this user: docker run [options] bash -c "su -m user -c <command>"
 RUN adduser --disabled-password --gecos '' user
