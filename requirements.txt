@@ -1,4 +1,4 @@
 Flask
 Flask-SQLAlchemy
 Flask-Cors
-PyCDS==2.0.1
+PyCDS>=2.1.0
