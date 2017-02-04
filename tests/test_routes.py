@@ -15,7 +15,15 @@ def mock(s, **kwargs):
     """Mock for wads.api.method functions, e.g, wads.api.method['backend']
     See explanation in module docstring.
     """
-    return ['info']
+    return [{
+        'network_name': 'foo',
+        'station_native_id': 'bar',
+        'station_name': 'baz',
+        'lon': 1.0,
+        'lat': 2.0,
+        'elevation': 3.0,
+        'datum': 4.0,
+    }]
 
 
 @mark.parametrize('route, status', [
@@ -57,4 +65,12 @@ def test_route_response_data(monkeypatch, test_client, route):
     monkeypatch.setitem(wads.api.method, 'weather', mock)
     response = test_client.get(route)
     data = json.loads(response.data.decode('utf-8'))
-    assert data == ['info']
+    assert data == [{
+        'network_name': 'foo',
+        'station_native_id': 'bar',
+        'station_name': 'baz',
+        'lon': 1.0,
+        'lat': 2.0,
+        'elevation': 3.0,
+        'datum': 4.0,
+    }]
