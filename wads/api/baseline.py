@@ -32,22 +32,27 @@ def baseline(session, variable, month):
         'precip': 'Precip_Climatology',
     }
 
-    q = session.query(
+    values = session.query(DerivedValue) \
+        .select_from(DerivedValue) \
+        .join(Variable, DerivedValue.vars_id == Variable.id) \
+        .join(Network, Variable.network_id == Network.id) \
+        .filter(Network.name == pcic_climate_variable_network_name) \
+        .filter(Variable.name == db_variable_name[variable]) \
+        .filter(func.date_part('month', DerivedValue.time) == float(month)) \
+        .subquery()
+
+    values_with_station_info = session.query(
         Network.name.label('network_name'),
         Station.native_id.label('station_native_id'),
-        History.station_name,
-        cast(History.lon, Float),
-        cast(History.lat, Float),
-        cast(History.elevation, Float),
-        DerivedValue.datum,
-    )\
-        .select_from(DerivedValue)\
-        .join(DerivedValue.history)\
-        .join(DerivedValue.variable)\
-        .join(History.station)\
-        .join(Variable.network)\
-        .filter(Network.name == pcic_climate_variable_network_name)\
-        .filter(Variable.name == db_variable_name[variable])\
-        .filter(func.date_part('month', DerivedValue.time) == float(month))
+        History.station_name.label('station_name'),
+        cast(History.lon, Float).label('lon'),
+        cast(History.lat, Float).label('lat'),
+        cast(History.elevation, Float).label('elevation'),
+        values.c.datum.label('datum'),
+    ) \
+        .select_from(values) \
+        .join(History, values.c.history_id == History.id) \
+        .join(Station, History.station_id == Station.id) \
+        .join(Network, Station.network_id == Network.id)
 
-    return dicts_from_rows(q.all())
+    return dicts_from_rows(values_with_station_info.all())
