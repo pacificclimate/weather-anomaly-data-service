@@ -1,4 +1,5 @@
 import datetime
+from sqlalchemy import cast, Float
 from pycds import Network, Station, History, Variable
 from pycds.weather_anomaly import \
     MonthlyAverageOfDailyMaxTemperature, MonthlyAverageOfDailyMinTemperature, MonthlyTotalPrecipitation
@@ -42,15 +43,15 @@ def weather(session, variable, year, month):
     q = session.query(
         Network.name.label('network_name'),
         Station.native_id.label('station_native_id'),
-        History.station_name,
-        History.lon,
-        History.lat,
-        History.elevation,
+        History.station_name.label('station_name'),
+        cast(History.lon, Float).label('lon'),
+        cast(History.lat, Float).label('lat'),
+        cast(History.elevation, Float).label('elevation'),
         History.freq.label('frequency'),
         Variable.name.label('network_variable_name'),
-        Variable.cell_method,
-        WeatherView.statistic,
-        WeatherView.data_coverage,
+        Variable.cell_method.label('cell_method'),
+        WeatherView.statistic.label('statistic'),
+        WeatherView.data_coverage.label('data_coverage'),
     ) \
         .select_from(WeatherView) \
         .join(History, WeatherView.history_id == History.id) \
