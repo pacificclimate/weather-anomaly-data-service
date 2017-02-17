@@ -43,7 +43,9 @@ def baseline(session, variable, month):
 
     values_with_station_info = session.query(
         Network.name.label('network_name'),
+        Station.id.label('station_db_id'),
         Station.native_id.label('station_native_id'),
+        History.id.label('history_db_id'),
         History.station_name.label('station_name'),
         cast(History.lon, Float).label('lon'),
         cast(History.lat, Float).label('lat'),

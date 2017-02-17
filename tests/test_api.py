@@ -1,5 +1,4 @@
 from pytest import mark, approx
-from pycds.climate_baseline_helpers import pcic_climate_variable_network_name
 from wads.api import baseline, weather
 
 
@@ -13,7 +12,9 @@ def test_baseline(baseline_session, histories, variable, month):
     assert sorted(result, key=lambda r: r['station_name']) == \
            [{
                 'network_name': history.station.network.name,
+                'station_db_id': history.station.id,
                 'station_native_id': history.station.native_id,
+                'history_db_id': history.id,
                 'station_name': history.station_name,
                 'lon': history.lon,
                 'lat': history.lat,
@@ -32,7 +33,9 @@ def test_weather(weather_session, histories, variable, year, month, nvm, cell_me
     assert sorted(result, key=lambda r: r['station_name']) == \
            [{
                 'network_name': history.station.network.name,
+                'station_db_id': history.station.id,
                 'station_native_id': history.station.native_id,
+                'history_db_id': history.id,
                 'station_name': history.station_name,
                 'lon': history.lon,
                 'lat': history.lat,
