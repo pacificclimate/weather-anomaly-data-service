@@ -1,0 +1,4 @@
+Flask
+Flask-SQLAlchemy
+Flask-Cors
+PyCDS>=2.1.0
