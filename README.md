@@ -1,9 +1,9 @@
-# weather-anomaly-data-service
-Data service backend for Weather Anomaly tool.
-=======
-# Weather Anomaly Data (Micro)Service (WADS)
+weather-anomaly-data-service 
+============================
 
-## Summary
+Data service backend for Weather Anomaly Tool
+
+# Summary
 
 This microservice provides data useful for inspecting weather anomalies. 
 Its primary client is the Weather Anomaly Tool.
@@ -26,7 +26,7 @@ Each data object contains station information (including network, station native
 at that station as appropriate to the endpoint (e.g., baseline monthly average of daily maxmimum temperature for
 a specified month).
 
-## Endpoints
+# Endpoints
 
 We follow RESTful conventions in this microservice. Specifically:
 
@@ -58,8 +58,6 @@ where
 
 ## Responses
 
-### General
-
 Endpoints return results as JSON (application/json). 
 
 Success is indicated by a 200 OK status.
@@ -67,11 +65,11 @@ Success is indicated by a 200 OK status.
 Any invalid URI results in a 404 Not Found status. Specifically,
 invalid values for `<variable>`, `<year>`, or `<month>` result in a 404 Not Found.
 
-### `/baseline/<variable>;<month>` endpoints
+### `/baseline/<variable>;<month>`
 
 Response data on success (200):
 
-```json
+```js
 [
     {
         "network_name": String,
@@ -88,16 +86,11 @@ Response data on success (200):
 
 `"datum"` is the value of the requested climate variable for the station.
 
-For weather data, `<requested info>` is two dictionary items, one containing the value of the 
-requested aggregate weather variable, and the other a number between 0 and 1 indicating the fraction of 
-actual observations contributing to the aggregate value relative to the possible number of observations contributing:
-
-
-### `/weather/<variable>;<year>-<month>` endpoints
+### `/weather/<variable>;<year>-<month>`
 
 Response data on success (200):
 
-```json
+```js
 [
     {
         "network_name": String,
@@ -120,7 +113,7 @@ Response data on success (200):
 `"data_coverage"` is a fraction in range [0,1] of count of actual observations to possible observations
 in month for aggregate (depends on frequency of observation of specific variable)
 
-## Requirements
+# Requirements
 
 ```
 libpq-dev 
@@ -128,10 +121,11 @@ python-dev
 postgresql-client
 ```
 
-## Installation
+# Installation
 
 It is best practice to install using a virtual environment.
-Current recommended practice for Python3.3+ to use the [builtin `venv` module](https://docs.python.org/3/library/venv.html).
+Current recommended practice for Python 3.3+ to use the builtin 
+[`venv` module](https://docs.python.org/3/library/venv.html).
 (Alternatively, `virtualenv` can still be used but it has shortcomings corrected in `venv`.)
 See [Creating Virtual Environments](https://packaging.python.org/installing/#creating-virtual-environments) for an
 overview of these tools.
@@ -146,7 +140,7 @@ $ source venv/bin/activate
 (venv)$ pip install -r test_requirements.txt
 ```
 
-### Configuration
+## Configuration
 
 Database dsn can be configured with the `PCDS_DSN` environment variable. 
 Defaults to `postgresql://httpd@monsoon.pcic.uvic.ca/crmp`
@@ -155,9 +149,9 @@ Defaults to `postgresql://httpd@monsoon.pcic.uvic.ca/crmp`
 (venv)$ PCDS_DSN=postgresql://dbuser:dbpass@dbhost/dbname scripts/devserver.py -p <port>
 ```
 
-### Testing
+# Testing
 
-#### Within the virtual environment:
+## Within the virtual environment:
 
 (Make sure you have installed the packages in `test_requirements.txt` as instructed above.)
 
@@ -165,9 +159,9 @@ Defaults to `postgresql://httpd@monsoon.pcic.uvic.ca/crmp`
 py.test -v
 ```
 
-### Using Docker
+## With Docker
 
-#### Building images
+### Building images
 
 To build production image:
 
@@ -181,8 +175,40 @@ To build development/testing image:
 docker build -t pcic/weather-anomaly-data-service-dev  -f Dockerfile.dev .
 ```
 
-To run tests (note: must use dev/test image):
+### To run tests (note: must use dev/test image):
 
 ```bash
 docker run --rm -it -v $(pwd):/app --name wads-test pcic/weather-anomaly-data-service-dev bash -c "su -m user -c 'py.test -v tests'"
+```
+
+# Production
+
+## Service
+
+We are running WADS at port 7050 on docker-prod.
+
+## Running the service
+
+The Weather Anomaly Data Service is set up to build 
+[on DockerHub](https://hub.docker.com/r/pcic/weather-anomaly-data-service/) 
+automatically from GitHub.
+
+Log in to `docker-prod`:
+
+```bash
+ssh docker-prod.pcic.uvic.ca
+```
+
+If migrating the production container, first stop the old container:
+
+```bash
+docker ps | grep weather-anomaly-data-service  # PID in first column
+docker stop PID
+```
+
+To pull an image (tag optional) and run it as a container on docker-prod:
+
+```bash
+docker pull pcic/weather-anomaly-data-service:TAG
+docker run -d -p 7050:8000 -e PCDS_DSN='postgresql://user:pwd@monsoon.pcic.uvic.ca/crmp' -v $(pwd):/app --name weather-anomaly-data-service pcic/weather-anomaly-data-service:TAG
 ```
