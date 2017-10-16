@@ -65,7 +65,7 @@ Success is indicated by a 200 OK status.
 Any invalid URI results in a 404 Not Found status. Specifically,
 invalid values for `<variable>`, `<year>`, or `<month>` result in a 404 Not Found.
 
-### `/baseline/<variable>;<month>`
+### GET `/baseline/<variable>;<month>`
 
 Response data on success (200):
 
@@ -73,7 +73,9 @@ Response data on success (200):
 [
     {
         "network_name": String,
-        "station_native_id": String,
+        "station_db_id": String,
+        "station_native_id": Number,
+        "history_db_id": Number,
         "station_name": String,
         "lon": Number,
         "lat": Number,
@@ -84,9 +86,19 @@ Response data on success (200):
 ]
 ```
 
-`"datum"` is the value of the requested climate variable for the station.
+One hash per station. Contents of the hash are:
 
-### `/weather/<variable>;<year>-<month>`
+- `network_name`: Name of the network to which the station belongs. `pycds.Network.name`
+- `station_db_id`: Database id of Station record for station. `pycds.Station.station_db_id`
+- `station_native_id`: Native id for station. `pycds.Station.native_id`
+- `history_db_id`: Database id of History record for station at the time specified in the request. `pycds.History.id`
+- `station_name`: Name of station at the time specified in the request. `pycds.History.station_name`
+- `lon`: Longitude of station at the time specified in the request. `pycds.History.lon`
+- `lat`: Latitude of station at the time specified in the request. `pycds.History.lat`
+- `elevation`: Elevation of station at the time specified in the request. `pycds.History.elevation`
+- `datum`: Value of the requested climate variable for the station.
+
+### GET `/weather/<variable>;<year>-<month>`
 
 Response data on success (200):
 
@@ -94,13 +106,16 @@ Response data on success (200):
 [
     {
         "network_name": String,
-        "station_native_id": String,
+        "station_db_id": String,
+        "station_native_id": Number,
+        "history_db_id": Number,
         "station_name": String,
         "lon": Number,
         "lat": Number,
         "elevation": Number,
         "frequency": String,
         "network_variable_name": String,
+        "cell_method": String,
         "statistic": Number,
         "data_coverage": Number
     },
@@ -108,10 +123,24 @@ Response data on success (200):
 ]
 ```
 
-`"statistic"` is the value of the requested aggregate weather variable at the station
+One hash per station. Contents of the hash are:
 
-`"data_coverage"` is a fraction in range [0,1] of count of actual observations to possible observations
-in month for aggregate (depends on frequency of observation of specific variable)
+- `network_name`: Name of the network to which the station belongs. `pycds.Network.name`
+- `station_db_id`: Database id of Station record for station. `pycds.Station.station_db_id`
+- `station_native_id`: Native id for station. `pycds.Station.native_id`
+- `history_db_id`: Database id of History record for station at the time specified in the request. `pycds.History.id`
+- `station_name`: Name of station at the time specified in the request. `pycds.History.station_name`
+- `lon`: Longitude of station at the time specified in the request. `pycds.History.lon`
+- `lat`: Latitude of station at the time specified in the request. `pycds.History.lat`
+- `elevation`: Elevation of station at the time specified in the request. `pycds.History.freq`
+- `frequency`: Frequency of observation of contributing variable in station at the time specified in the request. 
+`pycds.History.elevation`
+- `network_variable_name`: Name within network for contributing variable. `pycds.Variable.name`
+- `cell_method`: Method describing processing of observation of variable in station at the time 
+specified in the request. `pycds.Variable.cell_method`
+- `statistic`: Value of the requested aggregate weather variable at the station.
+- `data_coverage`: Fraction in range [0,1] of count of actual observations to possible observations
+at station in specified month for aggregate (depends on frequency of observation of the contributing variable)
 
 # Requirements
 
