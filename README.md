@@ -1,9 +1,9 @@
-# weather-anomaly-data-service
-Data service backend for Weather Anomaly tool.
-=======
-# Weather Anomaly Data (Micro)Service (WADS)
+weather-anomaly-data-service 
+============================
 
-## Summary
+Data service backend for Weather Anomaly Tool
+
+# Summary
 
 This microservice provides data useful for inspecting weather anomalies. 
 Its primary client is the Weather Anomaly Tool.
@@ -26,7 +26,7 @@ Each data object contains station information (including network, station native
 at that station as appropriate to the endpoint (e.g., baseline monthly average of daily maxmimum temperature for
 a specified month).
 
-## Endpoints
+# Endpoints
 
 We follow RESTful conventions in this microservice. Specifically:
 
@@ -58,8 +58,6 @@ where
 
 ## Responses
 
-### General
-
 Endpoints return results as JSON (application/json). 
 
 Success is indicated by a 200 OK status.
@@ -67,15 +65,17 @@ Success is indicated by a 200 OK status.
 Any invalid URI results in a 404 Not Found status. Specifically,
 invalid values for `<variable>`, `<year>`, or `<month>` result in a 404 Not Found.
 
-### `/baseline/<variable>;<month>` endpoints
+### GET `/baseline/<variable>;<month>`
 
 Response data on success (200):
 
-```json
+```js
 [
     {
         "network_name": String,
-        "station_native_id": String,
+        "station_db_id": String,
+        "station_native_id": Number,
+        "history_db_id": Number,
         "station_name": String,
         "lon": Number,
         "lat": Number,
@@ -86,28 +86,36 @@ Response data on success (200):
 ]
 ```
 
-`"datum"` is the value of the requested climate variable for the station.
+One hash per station. Contents of the hash are:
 
-For weather data, `<requested info>` is two dictionary items, one containing the value of the 
-requested aggregate weather variable, and the other a number between 0 and 1 indicating the fraction of 
-actual observations contributing to the aggregate value relative to the possible number of observations contributing:
+- `network_name`: Name of the network to which the station belongs. `pycds.Network.name`
+- `station_db_id`: Database id of Station record for station. `pycds.Station.station_db_id`
+- `station_native_id`: Native id for station. `pycds.Station.native_id`
+- `history_db_id`: Database id of History record for station at the time specified in the request. `pycds.History.id`
+- `station_name`: Name of station at the time specified in the request. `pycds.History.station_name`
+- `lon`: Longitude of station at the time specified in the request. `pycds.History.lon`
+- `lat`: Latitude of station at the time specified in the request. `pycds.History.lat`
+- `elevation`: Elevation of station at the time specified in the request. `pycds.History.elevation`
+- `datum`: Value of the requested climate variable for the station.
 
-
-### `/weather/<variable>;<year>-<month>` endpoints
+### GET `/weather/<variable>;<year>-<month>`
 
 Response data on success (200):
 
-```json
+```js
 [
     {
         "network_name": String,
-        "station_native_id": String,
+        "station_db_id": String,
+        "station_native_id": Number,
+        "history_db_id": Number,
         "station_name": String,
         "lon": Number,
         "lat": Number,
         "elevation": Number,
         "frequency": String,
         "network_variable_name": String,
+        "cell_method": String,
         "statistic": Number,
         "data_coverage": Number
     },
@@ -115,12 +123,26 @@ Response data on success (200):
 ]
 ```
 
-`"statistic"` is the value of the requested aggregate weather variable at the station
+One hash per station. Contents of the hash are:
 
-`"data_coverage"` is a fraction in range [0,1] of count of actual observations to possible observations
-in month for aggregate (depends on frequency of observation of specific variable)
+- `network_name`: Name of the network to which the station belongs. `pycds.Network.name`
+- `station_db_id`: Database id of Station record for station. `pycds.Station.station_db_id`
+- `station_native_id`: Native id for station. `pycds.Station.native_id`
+- `history_db_id`: Database id of History record for station at the time specified in the request. `pycds.History.id`
+- `station_name`: Name of station at the time specified in the request. `pycds.History.station_name`
+- `lon`: Longitude of station at the time specified in the request. `pycds.History.lon`
+- `lat`: Latitude of station at the time specified in the request. `pycds.History.lat`
+- `elevation`: Elevation of station at the time specified in the request. `pycds.History.freq`
+- `frequency`: Frequency of observation of contributing variable in station at the time specified in the request. 
+`pycds.History.elevation`
+- `network_variable_name`: Name within network for contributing variable. `pycds.Variable.name`
+- `cell_method`: Method describing processing of observation of variable in station at the time 
+specified in the request. `pycds.Variable.cell_method`
+- `statistic`: Value of the requested aggregate weather variable at the station.
+- `data_coverage`: Fraction in range [0,1] of count of actual observations to possible observations
+at station in specified month for aggregate (depends on frequency of observation of the contributing variable)
 
-## Requirements
+# Requirements
 
 ```
 libpq-dev 
@@ -128,10 +150,11 @@ python-dev
 postgresql-client
 ```
 
-## Installation
+# Installation
 
 It is best practice to install using a virtual environment.
-Current recommended practice for Python3.3+ to use the [builtin `venv` module](https://docs.python.org/3/library/venv.html).
+Current recommended practice for Python 3.3+ to use the builtin 
+[`venv` module](https://docs.python.org/3/library/venv.html).
 (Alternatively, `virtualenv` can still be used but it has shortcomings corrected in `venv`.)
 See [Creating Virtual Environments](https://packaging.python.org/installing/#creating-virtual-environments) for an
 overview of these tools.
@@ -146,7 +169,7 @@ $ source venv/bin/activate
 (venv)$ pip install -r test_requirements.txt
 ```
 
-### Configuration
+## Configuration
 
 Database dsn can be configured with the `PCDS_DSN` environment variable. 
 Defaults to `postgresql://httpd@monsoon.pcic.uvic.ca/crmp`
@@ -155,9 +178,9 @@ Defaults to `postgresql://httpd@monsoon.pcic.uvic.ca/crmp`
 (venv)$ PCDS_DSN=postgresql://dbuser:dbpass@dbhost/dbname scripts/devserver.py -p <port>
 ```
 
-### Testing
+# Testing
 
-#### Within the virtual environment:
+## Within the virtual environment:
 
 (Make sure you have installed the packages in `test_requirements.txt` as instructed above.)
 
@@ -165,9 +188,9 @@ Defaults to `postgresql://httpd@monsoon.pcic.uvic.ca/crmp`
 py.test -v
 ```
 
-### Using Docker
+## With Docker
 
-#### Building images
+### Building images
 
 To build production image:
 
@@ -181,8 +204,40 @@ To build development/testing image:
 docker build -t pcic/weather-anomaly-data-service-dev  -f Dockerfile.dev .
 ```
 
-To run tests (note: must use dev/test image):
+### To run tests (note: must use dev/test image):
 
 ```bash
 docker run --rm -it -v $(pwd):/app --name wads-test pcic/weather-anomaly-data-service-dev bash -c "su -m user -c 'py.test -v tests'"
+```
+
+# Production
+
+## Service
+
+We are running WADS at port 7050 on docker-prod.
+
+## Running the service
+
+The Weather Anomaly Data Service is set up to build 
+[on DockerHub](https://hub.docker.com/r/pcic/weather-anomaly-data-service/) 
+automatically from GitHub.
+
+Log in to `docker-prod`:
+
+```bash
+ssh docker-prod.pcic.uvic.ca
+```
+
+If migrating the production container, first stop the old container:
+
+```bash
+docker ps | grep weather-anomaly-data-service  # PID in first column
+docker stop PID
+```
+
+To pull an image (tag optional) and run it as a container on docker-prod:
+
+```bash
+docker pull pcic/weather-anomaly-data-service:TAG
+docker run -d -p 7050:8000 -e PCDS_DSN='postgresql://user:pwd@monsoon.pcic.uvic.ca/crmp' -v $(pwd):/app --name weather-anomaly-data-service pcic/weather-anomaly-data-service:TAG
 ```
