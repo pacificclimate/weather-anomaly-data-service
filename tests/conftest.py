@@ -4,11 +4,13 @@ from pytest import fixture
 import testing.postgresql
 
 from flask_sqlalchemy import SQLAlchemy
+import sqlalchemy
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.schema import DDL, CreateSchema
 
 import pycds
 from pycds import Network, Station, History, Variable, DerivedValue, Obs
 from pycds.weather_anomaly import \
-    DiscardedObs, \
     DailyMaxTemperature, DailyMinTemperature, \
     MonthlyAverageOfDailyMaxTemperature, MonthlyAverageOfDailyMinTemperature, MonthlyTotalPrecipitation
 
@@ -45,11 +47,6 @@ def test_client(app):
 def db(app):
     """Session-wide test database"""
     db = SQLAlchemy(app)
-
-    db.engine.execute("create extension postgis")
-    pycds.Base.metadata.create_all(bind=db.engine)
-    pycds.weather_anomaly.Base.metadata.create_all(bind=db.engine)
-
     yield db
 
     # FIXME: Database hang on teardown
@@ -69,22 +66,40 @@ def db(app):
     # pycds.weather_anomaly.Base.metadata.drop_all(bind=db.engine)
 
 
+@fixture(scope='session')
+def engine(db):
+    """Session-wide database engine"""
+    engine = db.engine
+    engine.execute("create extension postgis")
+    engine.execute(CreateSchema('crmp'))
+    pycds.Base.metadata.create_all(bind=engine)
+    # TODO: Is this CREATE OR REPLACE FUNCTION necessary?
+    sqlalchemy.event.listen(
+        pycds.weather_anomaly.Base.metadata,
+        'before_create',
+        DDL('''
+                CREATE OR REPLACE FUNCTION crmp.DaysInMonth(date) RETURNS double precision AS
+                $$
+                    SELECT EXTRACT(DAY FROM CAST(date_trunc('month', $1) + interval '1 month' - interval '1 day'
+                    as timestamp));
+                $$ LANGUAGE sql;
+            ''')
+    )
+    pycds.weather_anomaly.Base.metadata.create_all(bind=engine)
+
+    yield engine
+
 @fixture(scope='function')
-def session(db):
-    """Single-test database session. All session actions are wrapped in a transaction and rolled back on teardown"""
-    connection = db.engine.connect()
-    transaction = connection.begin()
-
-    options = dict(bind=connection, binds={})
-    session = db.create_scoped_session(options=options)
-
-    db.session = session
-
+def session(engine):
+    """Single-test database session. All session actions are rolled back on teardown"""
+    session = sessionmaker(bind=engine)()
+    # Default search path is `"$user", public`. Need to reset that to search crmp (for our db/orm content) and
+    # public (for postgis functions)
+    session.execute('SET search_path TO crmp, public')
+    # print('\nsearch_path', [r for r in session.execute('SHOW search_path')])
     yield session
-
-    transaction.rollback()
-    connection.close()
-    session.remove()
+    session.rollback()
+    session.close()
 
 
 @fixture(scope='function')
@@ -228,7 +243,7 @@ def weather_session(stations_session, air_temp_variables, precip_variables, temp
     stations_session.add_all(temp_values)
     stations_session.add_all(precip_values)
     stations_session.flush()
-    for view in [DiscardedObs, DailyMaxTemperature, DailyMinTemperature,
+    for view in [DailyMaxTemperature, DailyMinTemperature,
                  MonthlyAverageOfDailyMaxTemperature, MonthlyAverageOfDailyMinTemperature, MonthlyTotalPrecipitation]:
         view.create(stations_session)
     yield stations_session

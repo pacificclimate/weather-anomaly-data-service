@@ -9,8 +9,9 @@ def test_db_session_works(session):
     assert result.one == 1
 
 
-def test_db_has_some_expected_tables(db):
-    expected_table_names = '''meta_contact
+def test_db_has_some_expected_tables(engine):
+    expected_table_names = '''
+        meta_contact
         meta_vars
         meta_history
         meta_sensor
@@ -22,6 +23,7 @@ def test_db_has_some_expected_tables(db):
         meta_native_flag
         obs_raw_native_flags
     '''.split()
-    table_names = inspect(db.engine).get_table_names()
+    inspector = inspect(engine)
+    table_names = inspector.get_table_names(schema='crmp')
     for name in expected_table_names:
         assert name in table_names
