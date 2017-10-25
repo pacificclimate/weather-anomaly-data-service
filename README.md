@@ -189,4 +189,4 @@ docker run --rm -it -v $(pwd):/app --name wads-test pcic/weather-anomaly-data-se
 
 ## Misc
 
-Change to trigger DockerHub automated build ...
+Change to trigger DockerHub automated build ... changed!!!
