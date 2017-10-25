@@ -186,3 +186,7 @@ To run tests (note: must use dev/test image):
 ```bash
 docker run --rm -it -v $(pwd):/app --name wads-test pcic/weather-anomaly-data-service-dev bash -c "su -m user -c 'py.test -v tests'"
 ```
+
+## Misc
+
+Change to trigger DockerHub automated build ...
