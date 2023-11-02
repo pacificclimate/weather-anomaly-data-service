@@ -1,8 +1,13 @@
-# weather-anomaly-data-service
-Data service backend for Weather Anomaly tool.
-=======
 # Weather Anomaly Data (Micro)Service (WADS)
 
+Data service backend for Weather Anomaly tool.
+
+# DEPRECATED
+
+This service has been rolled into the [Station Data Portal Backend](https://github.com/pacificclimate/station-data-portal-backend). This project is no longer maintained and will be deleted soon.
+
+<strike>
+ 
 ## Summary
 
 This microservice provides data useful for inspecting weather anomalies. 
@@ -190,3 +195,5 @@ docker run --rm -it -v $(pwd):/app --name wads-test pcic/weather-anomaly-data-se
 ## Misc
 
 Change to trigger DockerHub automated build ...
+
+</strike>
