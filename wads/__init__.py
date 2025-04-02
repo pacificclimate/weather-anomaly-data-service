@@ -8,6 +8,7 @@ def get_app(config_override={}):
     app = Flask(__name__)
     CORS(app)
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('PCDS_DSN', 'postgresql://httpd@monsoon.pcic.uvic.ca/crmp')
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
     app.config.update(config_override)
     add_routes(app)
     return app
